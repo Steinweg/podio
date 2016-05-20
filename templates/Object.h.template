@@ -2,6 +2,8 @@
 #define ${name}_H
 $includes
 #include <vector>
+#include <iostream>
+
 #include "podio/ObjectID.h"
 
 // $description
@@ -40,12 +42,11 @@ ${constructor_declaration}
   ${name} clone() const;
   /// destructor
   ~${name}();
-
   /// conversion to const object
   operator Const${name} () const;
 
 public:
-
+ 
 $getter_declarations
 $setter_declarations
 $relation_declarations
@@ -67,12 +68,17 @@ $extracode_declarations
   bool operator<(const ${name}& other) const { return m_obj < other.m_obj  ; }
 
   const podio::ObjectID getObjectID() const;
-
 private:
   ${name}Obj* m_obj;
 
-};
 
 ${namespace_close}
+};
+
+inline std::ostream& operator<<( std::ostream& o, const ${name}& value ){
+   o ${printingstring} << std::endl ;
+//   o << "\n" ;
+   return o ;
+}
 
 #endif

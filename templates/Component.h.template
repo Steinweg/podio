@@ -9,4 +9,8 @@ $members
 $extracode_declarations
 };
 ${namespace_close}
+
+inline std::ostream& operator<<( std::ostream& o, const ${name}& value ){o ${printingstring} << std::endl ;//   o << "\n" ;return o ;}
+  
+
 #endif

@@ -71,6 +71,8 @@ public:
   /// Returns the object of given index
   const ${name} at(unsigned int index) const;
 
+  /// operator to allow pointer like calling of members a la LCIO             
+  ${name}Collection* operator->() { return (${name}Collection*) this ; } 
 
   /// Append object to the collection
   void push_back(Const${name} object);
