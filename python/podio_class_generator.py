@@ -548,7 +548,7 @@ class ClassGenerator(object):
     includes = "#include <iostream>"
     members = ""
     extracode_declarations = ""
-    definitionInComponents = ""    #Eike
+    outputstring = ""    #Eike
 
     #fg: sort the dictionary, so at least we get a predictable order (alphabetical) of the members
     keys = sorted( components.keys() ) 
@@ -556,15 +556,17 @@ class ClassGenerator(object):
       klass = components[ name ] 
 #    for name, klass in components.iteritems():
 
-      if( name != "ExtraCode" and  name != "ExtraDefinitiones"):
+      if( name != "ExtraCode" ):
           klassname = klass
           mnamespace = ""
           if "::" in klass:
             mnamespace, klassname = klass.split("::")
           if mnamespace == "":
             members+= "  %s %s;\n" %(klassname, name)
+            outputstring += "value."name
           else:
             members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
+            outputstring += "value."name
           if self.reader.components.has_key(klass):
               includes+= '#include "%s.h"\n' %(klassname)
       else:
@@ -572,9 +574,6 @@ class ClassGenerator(object):
         if klass.has_key("declaration"):
           extracode_declarations = klass["declaration"]
 
-         # handle user provided definition outsinde of class for Components
-        if klass.has_key("def"):
-          definitionInComponents = klass["def"]        #Eike
 
     substitutions = { "includes" : includes,
                       "members"  : members,
@@ -583,7 +582,7 @@ class ClassGenerator(object):
                       "package_name" : self.package_name,
                       "namespace_open" : namespace_open,
                       "namespace_close" : namespace_close,
-                      "definitionInComponents" : definitionInComponents     #Eike
+                      "outputstring" : outputstring     #Eike
     }
     self.fill_templates("Component",substitutions)
     self.created_classes.append(classname)
