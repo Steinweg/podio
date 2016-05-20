@@ -561,7 +561,7 @@ class ClassGenerator(object):
           mnamespace = ""
           if "::" in klass:
             mnamespace, klassname = klass.split("::")
-            if(name != value.len and name != value.vec[100]):
+            if(name != "len" and name != "vec[100]"):
               if mnamespace == "":
                 members+= "  %s %s;\n" %(klassname, name)
                 outputstring = outputstring + "value." + name + " << "
