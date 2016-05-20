@@ -566,7 +566,7 @@ class ClassGenerator(object):
                if(name != "len" and name != "vec[100]"):
                  outputstring = outputstring + "value." + name + " << "
                else:
-                 outputstring = outputstring +  '"(" ; for(int i = 0; i < value.size; i++){ o << value[i];} o << ")" <<' 
+                 outputstring = outputstring +  '"(" ; for(int i = 0; i < value.size(); i++){ o << value[i];} o << ")" <<' 
           else:
                members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
           if self.reader.components.has_key(klass):
