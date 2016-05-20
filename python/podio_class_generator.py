@@ -561,21 +561,14 @@ class ClassGenerator(object):
           mnamespace = ""
           if "::" in klass:
             mnamespace, klassname = klass.split("::")
-            if(name != "len" and name != "vec[100]"):
-              if mnamespace == "":
-                members+= "  %s %s;\n" %(klassname, name)
-                outputstring = outputstring + "value." + name + " << "
-              else:
-                members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
-                outputstring = outputstring + "value." + name
-            else:
-              if mnamespace == "":
-                members+= "  %s %s;\n" %(klassname, name)
-                outputstring =  '"(" ; for(int i = 0; i < value.size; i++){ o << value + i ;} o << ")" <<' 
-              else:
-                members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
-                outputstring = '"(" ; for(int i = 0; i < value.size; i++){ o << value + i ;} o << ")" <<'
-
+          if mnamespace == "":
+               members+= "  %s %s;\n" %(klassname, name)
+               if(name != "len" and name != "vec[100]"):
+                 outputstring = outputstring + "value." + name + " << "
+               else:
+                 outputstring = outputstring +  '"(" ; for(int i = 0; i < value.size; i++){ o << value + i ;} o << ")" <<' 
+          else:
+               members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
           if self.reader.components.has_key(klass):
               includes+= '#include "%s.h"\n' %(klassname)
       else:
