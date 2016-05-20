@@ -29,7 +29,6 @@ class ClassDefinitionValidator(object):
     "TransientMembers",
     "Typedefs",
     "ExtraCode",
-    "ExtraDeffinitiones"  #Eike
     "ConstExtraCode"
   )
 
@@ -74,7 +73,7 @@ class ClassDefinitionValidator(object):
     """Check that components only contain simple types or other components"""
     for mem in definition.keys():
         klass = definition[ mem ]
-        if not (mem=="ExtraCode" or mem == "ExtraDefinitiones" or klass in self.buildin_types or klass in self.components.keys() ): # Eike. ExtraDefinitiones
+        if not (mem=="ExtraCode" or klass in self.buildin_types or klass in self.components.keys() ):
             raise Exception("'%s' defines a member of a type '%s' which is not allowed in a component!" %(name, klass))
 #    for klass in definition.itervalues():
 #      if not (klass in self.buildin_types or klass in self.components.keys() ):
@@ -119,8 +118,6 @@ class PodioConfigReader(object):
            datatype["ExtraCode"] = self.handle_extracode(value["ExtraCode"])
         if value.has_key("ConstExtraCode"):
            datatype["ConstExtraCode"] = self.handle_extracode(value["ConstExtraCode"])
-        if value.has_key("ExtraDefinitiones"):
-           datatype["ExtraDefinitiones"] = self.handle_extracode(value["ExtraDefinitiones"])   #Eike
         self.datatypes[klassname] = datatype
     if "components" in content.keys():
       validator.check_components(content["components"])

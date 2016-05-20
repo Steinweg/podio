@@ -563,10 +563,10 @@ class ClassGenerator(object):
             mnamespace, klassname = klass.split("::")
           if mnamespace == "":
             members+= "  %s %s;\n" %(klassname, name)
-            outputstring += "value."name
+            outputstring = outputstring + "value." + name + " << "
           else:
             members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
-            outputstring += "value."name
+            outputstring += "value." + name
           if self.reader.components.has_key(klass):
               includes+= '#include "%s.h"\n' %(klassname)
       else:
