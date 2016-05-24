@@ -106,6 +106,7 @@ public:
   /// returns the address of the pointer to the data buffer
   void* getBufferAddress() { return (void*)&m_data;};
 
+
   /// returns the pointer to the data buffer
   std::vector<${name}Data>* _getBuffer() { return m_data;};
 
@@ -129,6 +130,19 @@ ${name}  ${name}Collection::create(Args&&... args){
   m_entries.push_back(obj);
   return ${name}(obj);
 }
+
+inline std::ostream& operator<<( std::ostream& o, const ${name}Collection& value ){
+       int k = 0;
+       for(int i = 0; i < value.size(); i++){
+       	       if(value[i].highestLengthOfInts > k){
+	       		k = value[i].highestLengthOfInts;
+	       }
+       }
+       std::vector<int> ;
+       for(int i = 0; i < value.size(); i++){o << std::scientific <<  value[i] << std::endl ;}
+       return o;
+}
+
 
 ${vectorized_access_implementation}
 ${namespace_close}

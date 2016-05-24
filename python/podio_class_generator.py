@@ -190,6 +190,8 @@ class ClassGenerator(object):
   def create_class(self, classname, definition):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
+    toFormattingStrings = {"int":" << std::setw(highestLengthOfInts)" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
+    arraydeclaration = ""
     printingstring = ""                                                             #Eike
     includes_cc = ""
     forward_declarations = ""
@@ -201,6 +203,7 @@ class ClassGenerator(object):
     constructor_signature = ""
     constructor_body = ""
     ConstGetter_implementations = ""
+    numberOfInts = 0
 
     # check whether all member types are known
     # and prepare include directives
@@ -254,7 +257,13 @@ class ClassGenerator(object):
       name = member["name"]
       klass = member["type"]
       gname,sname = name,name
-      printingstring = printingstring + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '                       #Eike 
+      if(klass in toFormattingStrings):
+        printingstring = printingstring + toFormattingStrings[klass] + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '             #Eike
+        if(klass == "int"):
+          arraydeclaration = arraydeclaration + "integerCollection[" + str(numberOfInts) + '] =  value.get' + name[:1].upper() + name[1:] + '() ;  '
+          numberOfInts = numberOfInts + 1
+      else:
+         printingstring = printingstring + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '                       #Eike 
       if( self.getSyntax ):
         gname = "get" + name[:1].upper() + name[1:]
         sname = "set" + name[:1].upper() + name[1:]
@@ -393,6 +402,8 @@ class ClassGenerator(object):
                      "setters"  : setter_implementations,
                      "setter_declarations": setter_declarations,
                      "printingstring": printingstring,                          #Eike
+                     "numberOfInts" : numberOfInts,
+                     "arraydeclaration" : arraydeclaration,
                      "constructor_declaration" : constructor_declaration,
                      "constructor_implementation" : constructor_implementation,
                      "extracode" : extracode,
@@ -564,9 +575,9 @@ class ClassGenerator(object):
           if mnamespace == "":
                members+= "  %s %s;\n" %(klassname, name)
                if(name != "len" and name != "vec[100]"):
-                 outputstring = outputstring + "value." + name + " << "
+                 outputstring = outputstring +  " << " + "value." + name + " << " + '"  "'
                else:
-                 outputstring = outputstring +  '"(" ; for(int i = 0; i < value.size(); i++){ o << value[i];} o << ")" <<' 
+                 outputstring = outputstring + ' << ""; for(int i = 0; i < value.size(); i++){ o << value[i] << "  ";}' 
           else:
                members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
           if self.reader.components.has_key(klass):

@@ -10,7 +10,7 @@ $extracode_declarations
 };
 ${namespace_close}
 
-inline std::ostream& operator<<( std::ostream& o, const ${name}& value ){o << ${outputstring} std::endl ;   o << "\n" ;return o ;}
+inline std::ostream& operator<<( std::ostream& o, const ${name}& value ){o ${outputstring} ;return o ;}
   
 
 #endif
