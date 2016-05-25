@@ -190,7 +190,7 @@ class ClassGenerator(object):
   def create_class(self, classname, definition):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
-    toFormattingStrings = {"int":" << std::setw(highestLengthOfInts)" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
+    toFormattingStrings = {"int":" << std::setw(intFormat" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
     arraydeclaration = ""
     printingstring = ""                                                             #Eike
     includes_cc = ""
@@ -257,11 +257,12 @@ class ClassGenerator(object):
       name = member["name"]
       klass = member["type"]
       gname,sname = name,name
-      if(klass in toFormattingStrings):
+      if(klass in toFormattingStrings and not klass == "int"):
         printingstring = printingstring + toFormattingStrings[klass] + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '             #Eike
-        if(klass == "int"):
-          arraydeclaration = arraydeclaration + "integerCollection[" + str(numberOfInts) + '] =  value.get' + name[:1].upper() + name[1:] + '() ;  '
-          numberOfInts = numberOfInts + 1
+      elif(klass == "int"):
+        arraydeclaration = arraydeclaration + "integerCollection[" + str(numberOfInts) + '] =  value.get' + name[:1].upper() + name[1:] + '() ;  '
+        numberOfInts = numberOfInts + 1
+        printingstring = printingstring + toFormattingStrings[klass] + classname + ') << value.get' + name[:1].upper() + name[1:] + '() << " " ' #Eike
       else:
          printingstring = printingstring + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '                       #Eike 
       if( self.getSyntax ):
@@ -694,6 +695,19 @@ class ClassGenerator(object):
     }
     self.fill_templates("Obj",substitutions)
     self.created_classes.append(classname+"Obj")
+
+  def create_Printinfo(self, classname, definition):
+
+    namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
+
+    datatype["includes"].append('#include "%s.h"' % (rawclassname+"Collection"))
+
+    # handle standard members
+    for member in definition["Members"]:
+      name = member["name"]
+      klass = member["type"]
+      
+      
 
   def prepare_vectorized_access(self, classname,members ):
     implementation = ""

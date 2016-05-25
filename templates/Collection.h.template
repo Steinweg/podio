@@ -112,6 +112,8 @@ public:
 
    ${vectorized_access_declaration}
 
+int findHigestLengthOfIntsColl(const ${name}Collection& value)const;
+
 private:
   bool m_isValid;
   int m_collectionID;
@@ -131,15 +133,11 @@ ${name}  ${name}Collection::create(Args&&... args){
   return ${name}(obj);
 }
 
-inline std::ostream& operator<<( std::ostream& o, const ${name}Collection& value ){
-       int k = 0;
+inline std::ostream& operator<<( std::ostream& o,const ${name}Collection& value ){
+       value.findHigestLengthOfIntsColl(value);
        for(int i = 0; i < value.size(); i++){
-       	       if(value[i].highestLengthOfInts > k){
-	       		k = value[i].highestLengthOfInts;
-	       }
-       }
-       std::vector<int> ;
-       for(int i = 0; i < value.size(); i++){o << std::scientific <<  value[i] << std::endl ;}
+	       o << std::scientific << value[i] << std::endl;
+	}
        return o;
 }
 

@@ -51,6 +51,7 @@ public:
  
 $getter_declarations
 $setter_declarations
+  int setIntFormat(int form){return form;};
 $relation_declarations
 $extracode_declarations
   /// check whether the object is actually available
@@ -70,40 +71,19 @@ $extracode_declarations
   bool operator<(const ${name}& other) const { return m_obj < other.m_obj  ; }
 
   const podio::ObjectID getObjectID() const;
+
+ int getHighestLengthOfInts(${name} value) const;
+
 private:
   ${name}Obj* m_obj;
-
 
 ${namespace_close}
 };
 
-inline std::ostream& operator<<( std::ostream& o, const ${name}& value ){
 
-       /* checks how to formate an integer variable so that you don't
-          use up useless space when printing them out. */
+int intFormat${name};
 
-       int highestLengthOfInts = 0;
-       int integerCollection [${numberOfInts}];
-       int j = 0;
-       
-       ${arraydeclaration}
-
-       for(unsigned int i = 0; i < ${numberOfInts}; i++){
-		j = 0;
-		while(integerCollection[i] != 0){
-			j++;
-			integerCollection[i] = integerCollection[i] / 10;
-		}
-
-		// j ist now equal to the length of an given Integer
-
-		if (j > highestLengthOfInts){
-			highestLengthOfInts = j;
-		}
-	}
-
-	// after this for loop higestLengthOfInts is equal to the length of the longest Integer of one Object
-
+inline std::ostream& operator<<( std::ostream& o, const ${name}& value ) {  
     o ${printingstring} ;
    return o ;
 }

@@ -40,8 +40,10 @@ ${name}::~${name}(){
 
 ${name}::operator Const${name}() const {return Const${name}(m_obj);}
 
+
 $getters
 $setters
+
 $relations
 $extracode
 bool  ${name}::isAvailable() const {
@@ -57,6 +59,39 @@ const podio::ObjectID ${name}::getObjectID() const {
   }
   return podio::ObjectID{-2,-2};
 }
+
+int getHighestLengthOfInts(${name} value) const {
+
+	/* checks how to formate an integer variable so that you don't
+           use up useless space when printing them out. */
+
+       int highestLengthOfInts = 0;
+       int integerCollection [${numberOfInts}];
+       int j = 0;
+       
+       ${arraydeclaration}
+
+       for(unsigned int i = 0; i < ${numberOfInts}; i++){
+		j = 0;
+		while(integerCollection[i] != 0){
+			j++;
+			integerCollection[i] = integerCollection[i] / 10;
+		}
+
+		// j ist now equal to the length of an given Integer
+
+		if (j > highestLengthOfInts){
+			highestLengthOfInts = j;
+		}
+	}
+
+	return highestLengthOfInts;
+
+	// after this for loop higestLengthOfInts is equal 
+	// to the length of the longest Integer of one Object
+
+}
+
 
 bool ${name}::operator==(const Const${name}& other) const {
   return (m_obj==other.m_obj);
