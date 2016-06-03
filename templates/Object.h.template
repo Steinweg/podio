@@ -1,6 +1,6 @@
 #ifndef ${name}_H
 #define ${name}_H
-$includes
+$includes  
 
 #include <vector>
 #include <iostream>
@@ -16,6 +16,7 @@ $forward_declarations
 
 #include "${name}Const.h"
 #include "${name}Obj.h"
+#include "${name}PrintInfo.h"
 
 ${namespace_open}
 
@@ -51,7 +52,6 @@ public:
  
 $getter_declarations
 $setter_declarations
-  int setIntFormat(int form){return form;};
 $relation_declarations
 $extracode_declarations
   /// check whether the object is actually available
@@ -72,8 +72,6 @@ $extracode_declarations
 
   const podio::ObjectID getObjectID() const;
 
- int getHighestLengthOfInts(${name} value) const;
-
 private:
   ${name}Obj* m_obj;
 
@@ -81,7 +79,6 @@ ${namespace_close}
 };
 
 
-int intFormat${name};
 
 inline std::ostream& operator<<( std::ostream& o, const ${name}& value ) {  
     o ${printingstring} ;

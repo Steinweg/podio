@@ -100,22 +100,6 @@ const ${name}* ${name}CollectionIterator::operator-> () const {
   return &m_object;
 }
 
-
-${name}[] findHighestIntOfCollection(std::ostream& o, ${name}Collection& value) const{
-
-	/*for formating purpose this function
-	  gives back the maximum length of all 
-	  integer variables of the collection*/
-	
-	int k = 0;
-	for(int i = 0; i < value.size(); i++){
-       	       	   if(value[i].getHighestLengthOfInts(value[i]) > k){
-  			    	k = value[i].getHighestLengthOfInts(value[i]);
-		    }
-	 }
-	 k = intFormat${name};
-}
-
 const ${name}CollectionIterator& ${name}CollectionIterator::operator++() const {
   ++m_index;
   return *this;

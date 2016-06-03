@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 import os
 import string
@@ -66,6 +67,7 @@ class ClassGenerator(object):
       self.create_class(name, components)
       self.create_collection(name, components)
       self.create_obj(name, components)
+      self.create_PrintInfo(name, components)
 
   def print_report(self):
     if self.verbose:
@@ -190,8 +192,7 @@ class ClassGenerator(object):
   def create_class(self, classname, definition):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
-    toFormattingStrings = {"int":" << std::setw(intFormat" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
-    arraydeclaration = ""
+    toFormattingStrings = {"int":" << std::setw(" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
     printingstring = ""                                                             #Eike
     includes_cc = ""
     forward_declarations = ""
@@ -208,9 +209,8 @@ class ClassGenerator(object):
     # check whether all member types are known
     # and prepare include directives
     datatype = self.process_datatype(classname, definition, False)
-
     datatype["includes"].append('#include "%s.h"' % (rawclassname+"Data"))
-
+ 
     # check on-to-one relations and prepare include directives
     oneToOneRelations = definition["OneToOneRelations"]
     for member in oneToOneRelations:
@@ -260,9 +260,8 @@ class ClassGenerator(object):
       if(klass in toFormattingStrings and not klass == "int"):
         printingstring = printingstring + toFormattingStrings[klass] + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '             #Eike
       elif(klass == "int"):
-        arraydeclaration = arraydeclaration + "integerCollection[" + str(numberOfInts) + '] =  value.get' + name[:1].upper() + name[1:] + '() ;  '
         numberOfInts = numberOfInts + 1
-        printingstring = printingstring + toFormattingStrings[klass] + classname + ') << value.get' + name[:1].upper() + name[1:] + '() << " " ' #Eike
+        printingstring = printingstring + toFormattingStrings[klass] + classname + "PrintInfo::instance()." + name + 'Width) << value.get' + name[:1].upper() + name[1:] + '() << " " ' #Eike
       else:
          printingstring = printingstring + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '                       #Eike 
       if( self.getSyntax ):
@@ -404,7 +403,6 @@ class ClassGenerator(object):
                      "setter_declarations": setter_declarations,
                      "printingstring": printingstring,                          #Eike
                      "numberOfInts" : numberOfInts,
-                     "arraydeclaration" : arraydeclaration,
                      "constructor_declaration" : constructor_declaration,
                      "constructor_implementation" : constructor_implementation,
                      "extracode" : extracode,
@@ -696,18 +694,50 @@ class ClassGenerator(object):
     self.fill_templates("Obj",substitutions)
     self.created_classes.append(classname+"Obj")
 
-  def create_Printinfo(self, classname, definition):
-
+  def create_PrintInfo(self, classname, definition):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
-    datatype["includes"].append('#include "%s.h"' % (rawclassname+"Collection"))
+    toFormattingStrings = {"char" : "3" , "unsigned char" : "3", "long":"11", "longlong":"22", "bool":"1"}
 
-    # handle standard members
+    WidthIntegers = ""
+    widthOthers = ""
+    
+
     for member in definition["Members"]:
       name = member["name"]
       klass = member["type"]
-      
-      
+      if(klass in toFormattingStrings  and not klass == "int"):
+        widthOthers = widthOthers + klass + " " + name + "Width = " + toFormattingStrings[klass] + " ; \n"
+      elif klass == "int":
+        WidthIntegers = WidthIntegers + klass + " " + name + "Width = 0 ; \n "
+    # check whether all member types are known
+    # and prepare include directives
+    datatype = self.process_datatype(classname, definition, False)
+    
+    # check one-to-many relations for consistency
+    # and prepare include directives
+  
+    # handle standard members
+      # set up signature
+      # constructor
+  # handle vector members
+    # handle constructor from values
+
+    substitutions = { "name" : rawclassname,
+                      "widthIntegers" : WidthIntegers,
+                      "widthOthers"   : widthOthers
+                      }
+
+
+    # handle one-to-many relations
+  
+
+    # handle user provided extra code
+ 
+      # TODO: add loading of code from external files
+
+    self.fill_templates("PrintInfo",substitutions)
+    self.created_classes.append(classname)
 
   def prepare_vectorized_access(self, classname,members ):
     implementation = ""
@@ -760,6 +790,9 @@ class ClassGenerator(object):
     elif category == "ConstObject":
       FN = "Const"
       endings = ("h","cc")
+    elif category == "PrintInfo":
+      FN = "PrintInfo"
+      endings = ("h")
     else:
       FN = category
       endings = ("h","cc")
