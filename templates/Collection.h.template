@@ -121,7 +121,7 @@ ${relations}
   // members to handle streaming
   podio::CollRefCollection m_refCollections;
   ${name}DataContainer* m_data;
-
+};
 
 template<typename... Args>
 ${name}  ${name}Collection::create(Args&&... args){
@@ -131,7 +131,6 @@ ${name}  ${name}Collection::create(Args&&... args){
   return ${name}(obj);
 }
 
-};
 
 inline std::ostream& operator<<( std::ostream& o,const ${name}Collection& value ){
        for(int i = 0; i < value.size(); i++){

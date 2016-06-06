@@ -192,7 +192,7 @@ class ClassGenerator(object):
   def create_class(self, classname, definition):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
-    toFormattingStrings = {"int":" << std::setw(" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
+    toFormattingStrings = {"int":" << std::setw(12)" , "long":" << std::setw(11)", "longlong":" << std::setw(22)", "bool":" << std::setw(1)"}
     printingstring = ""                                                             #Eike
     includes_cc = ""
     forward_declarations = ""
@@ -261,7 +261,7 @@ class ClassGenerator(object):
         printingstring = printingstring + toFormattingStrings[klass] + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '             #Eike
       elif(klass == "int"):
         numberOfInts = numberOfInts + 1
-        printingstring = printingstring + toFormattingStrings[klass] + classname + "PrintInfo::instance()." + name + 'Width) << value.get' + name[:1].upper() + name[1:] + '() << " " ' #Eike
+        printingstring = printingstring + toFormattingStrings[klass] + " << value.get" + name[:1].upper() + name[1:] + '() << " " ' #Eike
       else:
          printingstring = printingstring + ' << value.get' + name[:1].upper() + name[1:] + '() << " " '                       #Eike 
       if( self.getSyntax ):
@@ -453,6 +453,7 @@ class ClassGenerator(object):
     push_back_relations = ""
     prepareafterread_refmembers = ""
     prepareforwriting_refmembers = ""
+    printer = "" 
 
     refmembers = definition["OneToOneRelations"]
     refvectors = definition["OneToManyRelations"]
@@ -516,6 +517,9 @@ class ClassGenerator(object):
         # member
         relations += declarations["relation"].format(namespace=mnamespace, type=klassname, name=name)
         constructorbody += "\tm_refCollections.push_back(new std::vector<podio::ObjectID>());\n"
+        if klassname == "int":
+          printer +="setw(" + classname + "PrintInfo.instance()."
+        printer += "value[i].get" + name[:1].upper() + name[1:] +"() <<"
         # relation handling in ::clear
         clear_relations += implementations["clear_relations"].format(name=name)
         # relation handling in dtor:
@@ -697,10 +701,12 @@ class ClassGenerator(object):
   def create_PrintInfo(self, classname, definition):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
-    toFormattingStrings = {"char" : "3" , "unsigned char" : "3", "long":"11", "longlong":"22", "bool":"1"}
+    toFormattingStrings = {"char" : "3" , "unsigned char" : "3", "long":"11", "longlong":"22", "bool":"1", "int":""}
 
     WidthIntegers = ""
     widthOthers = ""
+    findMaximum = ""
+    setFormats = ""
     
 
     for member in definition["Members"]:
@@ -709,6 +715,15 @@ class ClassGenerator(object):
       if(klass in toFormattingStrings  and not klass == "int"):
         widthOthers = widthOthers + klass + " " + name + "Width = " + toFormattingStrings[klass] + " ; \n"
       elif klass == "int":
+        findMaximum += "\n    double " + name + "Max ; \n      for(int i = 0 ; i < value.length(); i++){ \n"
+        findMaximum += "         if( value[i].get" + name[:1].upper() + name[1:] + "() > 0 { \n" 
+        findMaximum += "            if(" + name + "Max <  value[i].get" + name[:1].upper() + name[1:] + "()); \n               " + name + "Max = value[i].get" + name[:1].upper() + name[1:] + ";" 
+        findMaximum += "\n         } \n" 
+        findMaximum += "         else if( -" + name + "Max / 10 > value[i].get" + name[:1].upper() + name[1:] + "()){ \n"
+        findMaximum += "             " + name + "Max = - value[i].get" +  name[:1].upper() + name[1:] + "() * 10; \n         } \n"
+        findMaximum += "         else{" + "-" + name + "Max * 10;" + "} \n"
+        setFormats  += "\n    while(" + name + "Max != 0){ \n"
+	setFormats  += "       " + name + "Width++; \n       " + name + "Max = " + name + "Max / 10; \n    } \n "
         WidthIntegers = WidthIntegers + klass + " " + name + "Width = 0 ; \n "
     # check whether all member types are known
     # and prepare include directives
@@ -725,7 +740,9 @@ class ClassGenerator(object):
 
     substitutions = { "name" : rawclassname,
                       "widthIntegers" : WidthIntegers,
-                      "widthOthers"   : widthOthers
+                      "widthOthers"   : widthOthers,
+                      "findMaximum"   : findMaximum,
+                      "setFormats"    : setFormats
                       }
 
 
