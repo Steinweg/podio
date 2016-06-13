@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 import os
 import string
@@ -578,9 +577,9 @@ class ClassGenerator(object):
           if mnamespace == "":
                members+= "  %s %s;\n" %(klassname, name)
                if(name != "len" and name != "vec[100]"):
-                 outputstring = outputstring +  " << " + "value." + name + " << " + '"  "'
+                 outputstring = outputstring +  " << " + "value." + name + " << " + '" "'
                else:
-                 outputstring = outputstring + ' << ""; for(int i = 0; i < value.size(); i++){ o << value[i] << "  ";}' 
+                 outputstring = outputstring + ' << ""; for(unsigned int i = 0; i < value.size(); i++){ o << value[i] << " ";}' 
           else:
                members += " ::%s::%s %s;\n" %(mnamespace, klassname, name)
           if self.reader.components.has_key(klass):
@@ -702,29 +701,67 @@ class ClassGenerator(object):
     namespace, rawclassname, namespace_open, namespace_close = self.demangle_classname(classname)
 
     toFormattingStrings = {"char" : "3" , "unsigned char" : "3", "long":"11", "longlong":"22", "bool":"1", "int":""}
+    formats = {"char" : 3 , "unsigned char" : 3, "long": 11, "longlong": 22 , "bool": 1,}
 
     WidthIntegers = ""
     widthOthers = ""
     findMaximum = ""
     setFormats = ""
-    
+    formattedOutput = ""
+    tableHeader = ""
 
     for member in definition["Members"]:
       name = member["name"]
+      lengthName = len(name)
       klass = member["type"]
       if(klass in toFormattingStrings  and not klass == "int"):
-        widthOthers = widthOthers + klass + " " + name + "Width = " + toFormattingStrings[klass] + " ; \n"
+        if(formats[klass] > lengthName):
+          widthOthers = widthOthers + "  int"+ " " + name + "Width = " + toFormattingStrings[klass] + " ; \n"
+        else:
+          widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
       elif klass == "int":
-        findMaximum += "\n    double " + name + "Max ; \n      for(int i = 0 ; i < value.length(); i++){ \n"
-        findMaximum += "         if( value[i].get" + name[:1].upper() + name[1:] + "() > 0 { \n" 
-        findMaximum += "            if(" + name + "Max <  value[i].get" + name[:1].upper() + name[1:] + "()); \n               " + name + "Max = value[i].get" + name[:1].upper() + name[1:] + ";" 
+        findMaximum += "\n    int " + name + "Max ; \n"  
+        findMaximum += "    " + name + "Width = 1 ; \n "
+        findMaximum += "     for(int i = 0 ; i < value.size(); i++){ \n"
+        findMaximum += "         if( value[i].get" + name[:1].upper() + name[1:] + "() > 0 ){ \n" 
+        findMaximum += "            if(" + name + "Max <  value[i].get" + name[:1].upper() + name[1:] + "()){ \n"
+        findMaximum += "               " + name + "Max = value[i].get" + name[:1].upper() + name[1:] + "();"
+        findMaximum += "\n            } \n" 
         findMaximum += "\n         } \n" 
         findMaximum += "         else if( -" + name + "Max / 10 > value[i].get" + name[:1].upper() + name[1:] + "()){ \n"
-        findMaximum += "             " + name + "Max = - value[i].get" +  name[:1].upper() + name[1:] + "() * 10; \n         } \n"
-        findMaximum += "         else{" + "-" + name + "Max * 10;" + "} \n"
+        findMaximum += "             " + name + "Max = - value[i].get" +  name[:1].upper() + name[1:] + "() * 10; "
+        findMaximum += "\n         } \n"
+        findMaximum += "     } \n"
         setFormats  += "\n    while(" + name + "Max != 0){ \n"
-	setFormats  += "       " + name + "Width++; \n       " + name + "Max = " + name + "Max / 10; \n    } \n "
-        WidthIntegers = WidthIntegers + klass + " " + name + "Width = 0 ; \n "
+	setFormats  += "       " + name + "Width++; \n       " + name + "Max = " + name + "Max / 10; \n    } \n"
+        setFormats  += "   if(" + name + "Width < " + str(lengthName) + "){ " + name + "Width = " + str(lengthName) + ";} \n"
+        WidthIntegers = WidthIntegers + "  " + klass + " " + name + "Width = 1 ; \n"
+      elif(klass == "double" or klass == "float"):
+        if(lengthName > 12):
+          widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
+        else:
+          widthOthers = widthOthers + "  int" + " " + name + "Width = 12 ; \n"
+      elif(klass == "DoubleThree" or klass == "FloatThree"):
+        if(lengthName > 38):
+          widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
+        else:
+          widthOthers += "  int" + " " + name + "Width = 38 ; \n"
+    #  elif(klass == "StringVec"):
+     #   tableHeader += 'std::setw(value[i]::' + name + '.size()) ; \n'
+      else:
+        widthOthers = widthOthers + "  int" + " " + name + "Width = 38 ; \n"
+      if(klass != "StingVec"):
+        tableHeader += 'std::setw(' + classname + "PrintInfo::instance()." + name + 'Width) << "' + name + '" << "|" << '
+      if(klass == "DoubleThree" or klass == "FloatThree" or klass == "StringVec"):
+        formattedOutput += " value[i].get" + name[:1].upper() + name[1:] + '() << " "' + " << "
+      else:
+        formattedOutput += " std::setw(" + classname + "PrintInfo::instance()." + name + "Width)"
+        formattedOutput += " << value[i].get" + name[:1].upper() + name[1:] + '() << " "' + " << "
+
+
+        
+
+
     # check whether all member types are known
     # and prepare include directives
     datatype = self.process_datatype(classname, definition, False)
@@ -742,7 +779,9 @@ class ClassGenerator(object):
                       "widthIntegers" : WidthIntegers,
                       "widthOthers"   : widthOthers,
                       "findMaximum"   : findMaximum,
-                      "setFormats"    : setFormats
+                      "setFormats"    : setFormats,
+                      "formattedOutput" : formattedOutput,
+                      "tableHeader"   : tableHeader
                       }
 
 

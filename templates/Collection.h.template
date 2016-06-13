@@ -132,12 +132,13 @@ ${name}  ${name}Collection::create(Args&&... args){
 }
 
 
-inline std::ostream& operator<<( std::ostream& o,const ${name}Collection& value ){
-       for(int i = 0; i < value.size(); i++){
+/* inline std::ostream& operator<<( std::ostream& o,const ${name}Collection& value ){
+     //   ${name}PrintInfo.instance().setIntegerWidth(value);
+          for(int i = 0; i < value.size(); i++){
 	       o << std::scientific << value[i] << std::endl;
-	}
-       return o;
-}
+        	}
+          return o;
+} */
 
 
 ${vectorized_access_implementation}

@@ -16,7 +16,6 @@ $forward_declarations
 
 #include "${name}Const.h"
 #include "${name}Obj.h"
-#include "${name}PrintInfo.h"
 
 ${namespace_open}
 
