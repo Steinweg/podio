@@ -40,8 +40,10 @@ ${name}::~${name}(){
 
 ${name}::operator Const${name}() const {return Const${name}(m_obj);}
 
+
 $getters
 $setters
+
 $relations
 $extracode
 bool  ${name}::isAvailable() const {
@@ -57,6 +59,7 @@ const podio::ObjectID ${name}::getObjectID() const {
   }
   return podio::ObjectID{-2,-2};
 }
+
 
 bool ${name}::operator==(const Const${name}& other) const {
   return (m_obj==other.m_obj);

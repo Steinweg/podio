@@ -1,0 +1,12 @@
+{ decls }
+namespace podio {  }
+namespace std {  }
+
+[ podioDict.so ]
+# List of selected classes
+class podio::CollectionBase
+class podio::CollectionIDTable
+class podio::ObjectID
+class podio::PythonEventStore
+class vector<podio::ObjectID>
+header podio/ObjectID.h

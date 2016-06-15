@@ -71,8 +71,6 @@ public:
   /// Returns the object of given index
   const ${name} at(unsigned int index) const;
 
-  /// operator to allow pointer like calling of members a la LCIO             
-  ${name}Collection* operator->() { return (${name}Collection*) this ; } 
 
   /// Append object to the collection
   void push_back(Const${name} object);
@@ -106,7 +104,6 @@ public:
   /// returns the address of the pointer to the data buffer
   void* getBufferAddress() { return (void*)&m_data;};
 
-
   /// returns the pointer to the data buffer
   std::vector<${name}Data>* _getBuffer() { return m_data;};
 
@@ -130,16 +127,6 @@ ${name}  ${name}Collection::create(Args&&... args){
   m_entries.push_back(obj);
   return ${name}(obj);
 }
-
-
-/* inline std::ostream& operator<<( std::ostream& o,const ${name}Collection& value ){
-     //   ${name}PrintInfo.instance().setIntegerWidth(value);
-          for(int i = 0; i < value.size(); i++){
-	       o << std::scientific << value[i] << std::endl;
-        	}
-          return o;
-} */
-
 
 ${vectorized_access_implementation}
 ${namespace_close}
