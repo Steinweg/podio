@@ -8,6 +8,32 @@ arguments = {}
 #-----------------------------------
 declarations["member_getter"] = "\tconst {type}& {fname}() const;\n"
 implementations["member_getter"] = "\tconst {type}& {classname}::{fname}() const {{ return m_obj->data.{name}; }}\n"
+declarations["maximum_finder"] = "\n    int  {name}Max ; \n"
+declarations["maximum_finder"] += "    int {name}Width = 1 ; \n"
+declarations["maximum_finder"] += "     for(int i = 0 ; i < value.size(); i++){{ \n"
+declarations["maximum_finder"] += "         if( value[i].get{forname}() > 0 ){{ \n"
+declarations["maximum_finder"] += "            if( {name}Max <  value[i].get{forname}()){{ \n"
+declarations["maximum_finder"] += "                {name}Max = value[i].get{forname}(); \n"
+declarations["maximum_finder"] += "            }} \n"
+declarations["maximum_finder"] += "         }} \n"
+declarations["maximum_finder"] += "     }}\n"
+declarations["format_setter"] =  "\n     while({name}Max != 0){{ \n "
+declarations["format_setter"] += "        {name}Width++; \n       {name}Max = {name}Max / 10; \n    }} \n"
+declarations["format_setter"] += "   if({name}Width < {nameLength}){{ {name}Width = {nameLength} ;}} \n"
+declarations["component_width"] = "      std::ostringstream oss{forName}; \n"
+declarations["component_width"] += '     oss{forName} << " " << value.get{forName}() << " "; \n'
+declarations["component_width"] += '     std::string s{forName} = oss{forName}.str(); \n'
+declarations["component_width"] += "     {name}Width = s{forName}.length(); \n \n "
+declarations["component_ostream_nVec"] =  "   inline std::ostream& operator<<( std::ostream& o,const {classname}& value ){{ \n"
+declarations["component_ostream_nVec"] += "       for(unsigned int i = 0; i < {memberNum}; i++){{ \n"
+declarations["component_ostream_nVec"] += '          o << value[i] << " " ; }} \n '
+declarations["component_ostream_nVec"] += "      return o ; \n "
+declarations["component_ostream_nVec"] += "   }} \n \n"
+declarations["component_ostream_yVec"] =  "   inline std::ostream& operator<<( std::ostream& o,const {classname}& value ){{ \n"
+declarations["component_ostream_yVec"] += "       for(unsigned int i = 0; i < value.size(); i++){{ \n"
+declarations["component_ostream_yVec"] += '          o << value[i] << " " ; }} \n '
+declarations["component_ostream_yVec"] += "      return o ; \n "
+declarations["component_ostream_yVec"] += "   }} \n \n"
 
 declarations["member_builtin_setter"] = "\tvoid {fname}({type} value);\n\n"
 implementations["member_builtin_setter"] = "void {classname}::{fname}({type} value){{ m_obj->data.{name} = value; }}\n"

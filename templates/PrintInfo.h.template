@@ -3,6 +3,10 @@
 #define  ${name}PrintInfo_h
 
 #include "${name}Collection.h"
+#include <string>       // std::string
+#include <iostream>     // std::cout
+#include <sstream> 
+#include <iomanip>
 
 class ${name}PrintInfo{
 
@@ -24,6 +28,10 @@ ${findMaximum}
 ${setFormats}	 
 
   }   
+
+  void setComponentWidths(${name} value){
+${componentWidths}
+  }
 
  static ${name}PrintInfo& instance(){
         static ${name}PrintInfo _me;
@@ -48,6 +56,9 @@ ${outputSingleObject} std::endl ;
        if(${name}PrintInfo::instance().printWithTableHeader){o << ${tableHeader}std::endl;}
 
        for(int i = 0; i < value.size(); i++){
+
+       	       ${name}PrintInfo::instance().setComponentWidths(value[i]);
+
 	       o << std::scientific << ${formattedOutput}  std::endl;
 	}
 

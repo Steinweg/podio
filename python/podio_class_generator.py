@@ -1,4 +1,4 @@
- #!/usr/bin/env python
+#!/usr/bin/env python
 import os
 import string
 import pickle
@@ -7,17 +7,26 @@ from podio_templates import declarations, implementations
 thisdir = os.path.dirname(os.path.abspath(__file__))
 
 _text_ = """
+
+
+
+
+
+
   PODIO Data Model
   ================
+
   Used
     %s
   to create
     %s classes
   in
     %s/
+
   Read instructions in
   the HOWTO.TXT to run
   your first example!
+
 """
 
 
@@ -548,6 +557,7 @@ class ClassGenerator(object):
         setFormats = ""
         formattedOutput = ""
         tableHeader = ""
+        componentWidths = ""
         for member in definition["Members"]:
             name = member["name"]
             lengthName = len(name)
@@ -558,47 +568,21 @@ class ClassGenerator(object):
                 else:
                     widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
             elif klass == "int":
-                findMaximum += "\n    int " + name + "Max ; \n"  
-                findMaximum += "    " + name + "Width = 1 ; \n "
-                findMaximum += "     for(int i = 0 ; i < value.size(); i++){ \n"
-                findMaximum += "         if( value[i].get" + name[:1].upper() + name[1:] + "() > 0 ){ \n" 
-                findMaximum += "            if(" + name + "Max <  value[i].get" + name[:1].upper() + name[1:] + "()){ \n"
-                findMaximum += "               " + name + "Max = value[i].get" + name[:1].upper() + name[1:] + "();"
-                findMaximum += "\n            } \n" 
-                findMaximum += "\n         } \n" 
-                findMaximum += "         else if( -" + name + "Max / 10 > value[i].get" + name[:1].upper() + name[1:] + "()){ \n"
-                findMaximum += "             " + name + "Max = - value[i].get" +  name[:1].upper() + name[1:] + "() * 10; "
-                findMaximum += "\n         } \n"
-                findMaximum += "     } \n"
-                setFormats  += "\n    while(" + name + "Max != 0){ \n"
-                setFormats  += "       " + name + "Width++; \n       " + name + "Max = " + name + "Max / 10; \n    } \n"
-                setFormats  += "   if(" + name + "Width < " + str(lengthName) + "){ " + name + "Width = " + str(lengthName) + ";} \n"
+                findMaximum += declarations["maximum_finder"].format(forname = name[:1].upper() + name[1:], name = name, nameLength = str(lengthName))
+                setFormats += declarations["format_setter"].format(name = name, nameLength = str(lengthName))
                 WidthIntegers = WidthIntegers + "  " + klass + " " + name + "Width = 1 ; \n"
             elif(klass == "double" or klass == "float"):
                 if(lengthName > 12):
                     widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
                 else:
                     widthOthers = widthOthers + "  int" + " " + name + "Width = 12 ; \n"
-            elif(klass == "DoubleThree" or klass == "FloatThree"):
-                if(lengthName > 38):
-                    widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
-                else:
-                    widthOthers += "  int" + " " + name + "Width = 38 ; \n"
-            elif(klass == "IntTwo"):
-                if(lengthName > 24):
-                    widthOthers = widthOthers + "  int" + " " + name + "Width = " + str(lengthName) + " ; \n"
-                else:
-                    widthOthers += "  int" + " " + name + "Width = 24 ; \n"
             else:
-                widthOthers = widthOthers + "  int" + " " + name + "Width = 38 ; \n"
-            if(klass != "StingVec"):
+                componentWidths += declarations["component_width"].format(forName = name[:1].upper() + name[1:], name = name)
+                widthOthers = widthOthers + "  int" + " " + name + "Width = 1 ; \n"
                 tableHeader += 'std::setw(' + classname + "PrintInfo::instance()." + name + 'Width) << "' + name + '" << "|" << '
-                if(klass == "DoubleThree" or klass == "FloatThree" or klass == "StringVec"):
-                    formattedOutput += " value[i].get" + name[:1].upper() + name[1:] + '() << " "' + " << "
-                else:
-                    formattedOutput += " std::setw(" + classname + "PrintInfo::instance()." + name + "Width)"
-                    formattedOutput += " << value[i].get" + name[:1].upper() + name[1:] + '() << " "' + " << "
-                    outputSingleObject += '"' + klass + '" << " " << "' + name + '" << " "' + " << value.get" + name[:1].upper() + name[1:] + '() << " "' + " << "
+                formattedOutput += " std::setw(" + classname + "PrintInfo::instance()." + name + "Width)"
+                formattedOutput += " << value[i].get" + name[:1].upper() + name[1:] + '() << " "' + " << "
+                outputSingleObject += '"' + klass + '" << " " << "' + name + '" << " "' + " << value.get" + name[:1].upper() + name[1:] + '() << " "' + " << "
 
 
         substitutions = { "name" : rawclassname,
@@ -608,7 +592,8 @@ class ClassGenerator(object):
                       "setFormats"    : setFormats,
                       "formattedOutput" : formattedOutput,
                       "tableHeader"   : tableHeader,
-                      "outputSingleObject" : outputSingleObject
+                      "outputSingleObject" : outputSingleObject,
+                      "componentWidths" : componentWidths
                       }
  
       # TODO: add loading of code from external files
@@ -629,9 +614,20 @@ class ClassGenerator(object):
       extracode_declarations = ""
       ostreamComponents = ""
       printed = [""]
+      numMembers = 0
 
       #fg: sort the dictionary, so at least we get a predictable order (alphabetical) of the members
       keys = sorted( components.keys() )
+      for name in keys:
+           klass = components[name]
+           if( name != "ExtraCode"):
+              klassname = klass
+              mnamespace = ""
+              if "::" in klass:
+                  mnamespace, klassname = klass.split("::")
+              if mnamespace == "":
+                  numMembers += 1
+      print numMembers
       for name in keys:
         klass = components[ name ]
   #    for name, klass in components.iteritems():
@@ -641,26 +637,11 @@ class ClassGenerator(object):
           if "::" in klass:
             mnamespace, klassname = klass.split("::")
           if mnamespace == "":
-              if((classname == "DoubleThree" or classname == "FloatThree") and not classname in printed):
-                    ostreamComponents +=  "   inline std::ostream& operator<<( std::ostream& o,const " + classname + "& value ){ \n"
-                    ostreamComponents +=  "       for(unsigned int i = 0; i < 3; i++){ \n"
-                    ostreamComponents +=  '          o << value[i] << " " ; } \n'
-                    ostreamComponents +=  "       return o ; \n"
-                    ostreamComponents +=  "   } \n \n"
+              if("Vec" not in classname and classname not in printed):
+                    ostreamComponents +=  declarations["component_ostream_nVec"].format(classname = classname, memberNum = str(numMembers))
                     printed += [classname]
-              elif(classname == "IntTwo" and not classname in printed):
-                    ostreamComponents +=  "   inline std::ostream& operator<<( std::ostream& o,const " + classname + "& value ){ \n"
-                    ostreamComponents +=  "       for(unsigned int i = 0; i < 2; i++){ \n"
-                    ostreamComponents +=  '          o << value[i] << " " ; } \n'
-                    ostreamComponents +=  "       return o ; \n"
-                    ostreamComponents +=  "   } \n \n"
-                    printed += [classname]
-              elif(classname == "StringVec" and not classname in printed):
-                    ostreamComponents +=  "   inline std::ostream& operator<<( std::ostream& o,const " + classname + "& value ){ \n"
-                    ostreamComponents +=  "       for(unsigned int i = 0; i < value.size(); i++){"
-                    ostreamComponents +=  '          o << value[i] << " " ; } \n'
-                    ostreamComponents +=  "       return o ; \n"
-                    ostreamComponents +=  "   } \n \n"
+              elif(classname not in printed):
+                    ostreamComponents +=  declarations["component_ostream_yVec"].format(classname = classname)
                     printed += [classname] 
               members+= "  %s %s;\n" %(klassname, name)
           else:
